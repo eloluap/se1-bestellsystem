@@ -13,9 +13,12 @@ import datamodel.OrderItem;
 final class OutputProcessor implements Components.OutputProcessor {
 
 	private final int printLineWidth = 95;
+	private InventoryManager inventoryManager;
+	private OrderProcessor orderProcessor;
 	
 	public OutputProcessor(InventoryManager inventoryManager, OrderProcessor orderProcessor) {
-		// TODO Auto-generated method stub
+		this.inventoryManager = inventoryManager;
+		this.orderProcessor = orderProcessor;
 	}
 	
 	@Override
@@ -23,6 +26,7 @@ final class OutputProcessor implements Components.OutputProcessor {
 		StringBuffer sbAllOrders = new StringBuffer( "-------------" );
 		StringBuffer sbLineItem = new StringBuffer();
 		long gesamtPreis = 0;
+		long gesamtSteuern = 0;
 
 		/*
 		 * Insert code to print orders with all order items:
@@ -30,6 +34,7 @@ final class OutputProcessor implements Components.OutputProcessor {
 		for (Order o: orders) {
 			String text = "#";
 			long bestellPreis = 0;
+			long bestellSteuern = 0;
 			text += o.getId();
 			text += ", ";
 			Customer customer = o.getCustomer();
@@ -44,19 +49,27 @@ final class OutputProcessor implements Components.OutputProcessor {
 				if (i.hasNext()) {
 					text += ", ";
 				}
-				bestellPreis += item.getArticle().getUnitPrice()*item.getUnitsOrdered();
+				long itemPreis = item.getArticle().getUnitPrice()*item.getUnitsOrdered();
+				bestellPreis += itemPreis;
+				bestellSteuern += orderProcessor.vat(itemPreis);
 			}
 			gesamtPreis += bestellPreis;
+			gesamtSteuern += bestellSteuern;
 			String fmtBestellPreis = fmtPrice( bestellPreis, "EUR", 14 );
 			sbLineItem = fmtLine( text, fmtBestellPreis, printLineWidth );
 			sbAllOrders.append( "\n" );
 			sbAllOrders.append( sbLineItem );
 		}
 		String fmtGesamtPreis = fmtPrice( gesamtPreis, "EUR", 14 );
+		String fmtGesamtSteuern = fmtPrice( gesamtSteuern, "EUR", 14 );
 		sbAllOrders.append( "\n" )
 		.append( fmtLine( "-------------", "-------------", printLineWidth ) )
 		.append( "\n" )
 		.append( fmtLine( "Gesamtwert aller Bestellungen:", fmtGesamtPreis, printLineWidth ) );
+		if (printVAT) {
+			sbAllOrders.append( "\n" )
+			.append( fmtLine( "Im Gesamtbetrag enthaltene Mehrwertsteuer (19%):", fmtGesamtSteuern, printLineWidth ) );
+		}
 
 		/*
 		 * // convert price (long: 2345 in cent) to String of length 14, right-aligned

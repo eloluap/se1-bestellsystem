@@ -9,7 +9,7 @@ final class OrderProcessor implements Components.OrderProcessor {
 	public OrderProcessor(InventoryManager inventoryManager) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public boolean accept(Order order) {
 		// TODO Auto-generated method stub
@@ -31,14 +31,21 @@ final class OrderProcessor implements Components.OrderProcessor {
 
 	@Override
 	public long vat(long grossValue) {
-		// TODO Auto-generated method stub
-		return 0;
+		return vat(grossValue, 1);
 	}
 
 	@Override
 	public long vat(long grossValue, int rateIndex) {
-		// TODO Auto-generated method stub
-		return 0;
+		double rate = 0;
+		switch (rateIndex) {
+		case 1:
+			rate = 1.19;
+			break;
+		case 2:
+			rate = 1.07;
+			break;
+		}
+		return Math.round(grossValue - grossValue / rate);
 	}
 
 }
