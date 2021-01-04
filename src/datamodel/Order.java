@@ -12,7 +12,11 @@ public class Order {
 	
 	protected Order(long id, Date date, Customer customer) {
 		this.id = id;
-		this.date = date;
+		if (date == null) {
+			this.date = new Date();
+		} else {
+			this.date = date;
+		}
 		this.customer = customer;
 		this.items = new ArrayList<OrderItem>();
 	}
@@ -38,7 +42,9 @@ public class Order {
 	}
 	
 	public Order addItem(OrderItem item) {
-		this.items.add(item);
+		if (this.items.contains(item) == false && item != null) {
+			this.items.add(item);
+		}
 		return this;
 	}
 	
